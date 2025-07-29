@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('remindme', function (Blueprint $table) {
+        Schema::create('times', function (Blueprint $table) {
             $table->id();
-            $table->string('text');
-            $table->text('description');
-            $table->
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('start_time');
             $table->timestamps();
         });
     }
@@ -25,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('remindme');
+        Schema::dropIfExists('times');
     }
 };
