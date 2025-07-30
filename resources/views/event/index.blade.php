@@ -1,344 +1,348 @@
-<style>
-    .time-input-group {
-        margin-bottom: 10px;
-    }
-    .monthly-checkboxes {
-        max-height: 200px;
-        overflow-y: auto;
-    }
-    .day-checkbox {
-        margin-right: 15px;
-        margin-bottom: 10px;
-    }
-    .color-preview {
-        width: 30px;
-        height: 30px;
-        border-radius: 4px;
-        border: 1px solid #dee2e6;
-        display: inline-block;
-        margin-left: 10px;
-    }
-</style>
-@stack('style')
-
 @include('layouts.header')
 
-<!-- partial -->
 <div class="main-panel">
     <div class="content-wrapper">
-        <div class="row">
-            <div class="container my-5">
-                <div class="row justify-content-center">
-                    <div class="col-md-12">
-                        <div class="card shadow">
-                            <div class="card-header bg-primary text-white">
-                                <h3 class="card-title mb-0">Deployment Strategy Configuration</h3>
-                            </div>
-                            <div class="card-body">
-                                <form action="{{ route('dashboard.events.store') }}" method="POST">
-                                    @csrf
-                                    <div style="padding-left: 30px;">
-                                        <!-- Title -->
-                                        <div class="mb-3">
-                                            <label for="title" class="form-label">Strategy Title</label>
-                                            <input type="text" name="title" class="form-control" id="title" placeholder="Enter deployment strategy title" required>
-                                        </div>
-
-                                        <!-- Color -->
-                                        <div class="mb-3">
-                                            <label for="color" class="form-label">Color Theme</label>
-                                            <div class="d-flex align-items-center">
-                                                <input type="color" name="color" class="form-control form-control-color" id="color" value="#0d6efd" title="Choose color">
-                                                <span class="color-preview ms-2" id="colorPreview" style="background-color: #0d6efd;"></span>
-                                                <span class="ms-2" id="colorValue">#0d6efd</span>
-                                            </div>
-                                        </div>
-
-                                        <!-- Description -->
-                                        <div class="mb-3">
-                                            <label for="description" class="form-label">Description</label>
-                                            <textarea name="description" class="form-control" id="description" rows="3" placeholder="Describe your deployment strategy" required></textarea>
-                                        </div>
-
-                                        <!-- Frequency -->
-                                        <div class="mb-3">
-                                            <label for="frequency" class="form-label">Deployment Frequency</label>
-                                            <select class="form-select" name="repeat_interval" id="frequency" onchange="toggleFrequencyOptions()">
-                                                <option value="daily">Daily</option>
-                                                <option value="weekly">Weekly</option>
-                                                <option value="monthly">Monthly</option>
-                                            </select>
-                                        </div>
-
-                                        <!-- Daily Options -->
-                                        <div class="mb-3" id="dailyOptions">
-                                            <label for="dailyInterval" class="form-label">Every N Days</label>
-                                            <input type="number" name="repeat_days" class="form-control" id="dailyInterval" min="1" >
-                                        </div>
-
-                                        <!-- Weekly Options -->
-                                        <div class="mb-3" id="weeklyOptions" style="display: none;">
-                                            <label class="form-label">Days of the Week</label>
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <div class="form-check day-checkbox">
-                                                        <input name="weekly_days[]" class="form-check-input" type="checkbox" value="monday" id="mon">
-                                                        <label class="form-check-label" for="mon">Monday</label>
-                                                    </div>
-                                                    <div class="form-check day-checkbox">
-                                                        <input name="weekly_days[]" class="form-check-input" type="checkbox" value="tuesday" id="tue">
-                                                        <label class="form-check-label" for="tue">Tuesday</label>
-                                                    </div>
-                                                    <div class="form-check day-checkbox">
-                                                        <input name="weekly_days[]" class="form-check-input" type="checkbox" value="wednesday" id="wed">
-                                                        <label class="form-check-label" for="wed">Wednesday</label>
-                                                    </div>
-                                                    <div class="form-check day-checkbox">
-                                                        <input name="weekly_days[]" class="form-check-input" type="checkbox" value="thursday" id="thu">
-                                                        <label class="form-check-label" for="thu">Thursday</label>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-check day-checkbox">
-                                                        <input name="weekly_days[]" class="form-check-input" type="checkbox" value="friday" id="fri">
-                                                        <label class="form-check-label" for="fri">Friday</label>
-                                                    </div>
-                                                    <div class="form-check day-checkbox">
-                                                        <input name="weekly_days[]" class="form-check-input" type="checkbox" value="saturday" id="sat">
-                                                        <label class="form-check-label" for="sat">Saturday</label>
-                                                    </div>
-                                                    <div class="form-check day-checkbox">
-                                                        <input name="weekly_days[]" class="form-check-input" type="checkbox" value="sunday" id="sun">
-                                                        <label class="form-check-label" for="sun">Sunday</label>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Monthly Options -->
-                                        <div class="mb-3" id="monthlyOptions" style="display: none;">
-                                            <label class="form-label">Days of the Month</label>
-                                            <div class="monthly-checkboxes border rounded p-3">
-                                                <div class="row" id="monthlyDaysContainer">
-                                                    <!-- Generated by JavaScript -->
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Event Times -->
-                                        <div class="mb-3">
-                                            <label class="form-label">Event Times</label>
-                                            <div id="eventTimesContainer">
-                                                <div class="time-input-group d-flex align-items-center">
-                                                    <select name="event_times[]" class="form-select me-2">
-                                                        <!-- Generated by JavaScript -->
-                                                    </select>
-                                                    <button type="button" class="btn btn-danger btn-sm" onclick="removeTimeInput(this)" style="display: none;">Remove</button>
-                                                </div>
-                                            </div>
-                                            <button type="button" class="btn btn-success btn-sm mt-2" onclick="addTimeInput()">Add Time</button>
-                                        </div>
-
-                                        <!-- Submit Button -->
-                                        <div class="d-grid">
-                                            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
-                                                Save Deployment Strategy
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-
-                                <!-- Preview -->
-                                <div class="mt-4">
-                                    <h5>Preview</h5>
-                                    <div class="card bg-light">
-                                        <div class="card-body">
-                                            <div id="previewContent">
-                                                <p><strong>Title:</strong> <span id="previewTitle">Untitled</span></p>
-                                                <p><strong>Color:</strong> <span id="previewColor" class="color-preview me-2"></span><span id="previewColorValue">#0d6efd</span></p>
-                                                <p><strong>Description:</strong> <span id="previewDescription">No description</span></p>
-                                                <p><strong>Frequency:</strong> <span id="previewFrequency">daily</span></p>
-                                                <p id="previewFrequencyDetails"><strong>Interval:</strong> Every 1 day(s)</p>
-                                                <p><strong>Times:</strong> <span id="previewTimes">09:00</span></p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+        <div class="container-fluid py-4">
+            <!-- Header -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-1">📅 My Events</h2>
+                            <p class="text-muted mb-0">Manage your scheduled events and reminders</p>
                         </div>
+                        <a href="{{ route('dashboard.events.create') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Add New Event
+                        </a>
                     </div>
                 </div>
             </div>
 
-@include('layouts.footer')
+            <!-- Filter Tabs -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <ul class="nav nav-pills nav-fill bg-light rounded p-1">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#all" data-bs-toggle="pill">
+                        <i class="fas fa-calendar me-2"></i>All Events
+                        <span class="badge bg-secondary ms-2">{{ $events->count() }}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#daily" data-bs-toggle="pill">
+                        <i class="fas fa-sun me-2"></i>Daily
+                        <span class="badge bg-warning ms-2">{{ $events->where('repeat_type', 'daily')->count() }}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#weekly" data-bs-toggle="pill">
+                        <i class="fas fa-calendar-week me-2"></i>Weekly
+                        <span class="badge bg-info ms-2">{{ $events->where('repeat_type', 'weekly')->count() }}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#monthly" data-bs-toggle="pill">
+                        <i class="fas fa-calendar-alt me-2"></i>Monthly
+                        <span class="badge bg-success ms-2">{{ $events->where('repeat_type', 'monthly')->count() }}</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+            <!-- Events Grid -->
+    <div class="tab-content">
+        <!-- All Events Tab -->
+        <div class="tab-pane fade show active" id="all">
+            @if($events->count() > 0)
+                <div class="row">
+                    @foreach($events as $event)
+                        <div class="col-lg-4 col-md-6 mb-4 event-card" data-type="{{ $event->repeat_type }}">
+                            <div class="card h-100 shadow-sm border-0 hover-shadow">
+                                <!-- Card Header with Color -->
+                                <div class="card-header border-0 d-flex justify-content-between align-items-center"
+                                     style="background: linear-gradient(135deg, {{ $event->colors ?? '#6c757d' }}, {{ $event->colors ?? '#6c757d' }}cc);">
+                                    <div class="text-white">
+                                        <span class="badge bg-white text-dark me-2">
+                                            @if($event->repeat_type == 'daily')
+                                                <i class="fas fa-sun"></i> Daily
+                                            @elseif($event->repeat_type == 'weekly')
+                                                <i class="fas fa-calendar-week"></i> Weekly
+                                            @else
+                                                <i class="fas fa-calendar-alt"></i> Monthly
+                                            @endif
+                                        </span>
+                                        <small class="opacity-75">{{ ucfirst($event->status) }}</small>
+                                    </div>
+                                    <div class="dropdown">
+                                        <button class="btn btn-link text-white p-0" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li><a class="dropdown-item" href="{{ route('dashboard.events.edit', $event->id) }}">
+                                                <i class="fas fa-edit me-2"></i>Edit
+                                            </a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <form action="{{ route('dashboard.events.destroy', $event->id) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button class="dropdown-item text-danger" onclick="return confirm('Are you sure?')">
+                                                        <i class="fas fa-trash me-2"></i>Delete
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <!-- Card Body -->
+                                <div class="card-body">
+                                    <h5 class="card-title mb-3">{{ $event->title }}</h5>
+                                    <p class="card-text text-muted mb-3">{{ Str::limit($event->description, 100) }}</p>
+
+                                    <!-- Schedule Info -->
+                                    <div class="mb-3">
+                                        <h6 class="text-muted mb-2"><i class="fas fa-clock me-2"></i>Schedule:</h6>
+
+                                        @if($event->repeat_type == 'weekly' && $event->repeat_days_moth)
+                                            @php
+                                                $weeklyDays = json_decode($event->repeat_days_moth, true) ?? [];
+                                            @endphp
+                                            <div class="d-flex flex-wrap gap-1 mb-2">
+                                                @foreach($weeklyDays as $day)
+                                                    <span class="badge bg-light text-dark">{{ ucfirst($day) }}</span>
+                                                @endforeach
+                                            </div>
+                                        @endif
+
+                                        @if($event->repeat_type == 'monthly' && $event->repeat_days_moth)
+                                            @php
+                                                $monthlyDays = json_decode($event->repeat_days_moth, true) ?? [];
+                                            @endphp
+                                            <div class="d-flex flex-wrap gap-1 mb-2">
+                                                @foreach($monthlyDays as $day)
+                                                    <span class="badge bg-light text-dark">{{ $day }}</span>
+                                                @endforeach
+                                            </div>
+                                        @endif
+
+                                        @if($event->start_date)
+                                            @php
+                                                $eventTimes = json_decode($event->start_date, true) ?? [];
+                                            @endphp
+                                            <div class="d-flex flex-wrap gap-1">
+                                                @foreach($eventTimes as $time)
+                                                    <span class="badge bg-primary">{{ $time }}</span>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <!-- Card Footer -->
+                                <div class="card-footer bg-transparent border-0">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar-plus me-1"></i>
+                                            Created {{ $event->created_at->diffForHumans() }}
+                                        </small>
+                                        @if($event->status == 'active')
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check-circle me-1"></i>Active
+                                            </span>
+                                        @else
+                                            <span class="badge bg-secondary">
+                                                <i class="fas fa-pause-circle me-1"></i>Inactive
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <!-- Empty State -->
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-calendar-times fa-5x text-muted opacity-25"></i>
+                    </div>
+                    <h4 class="text-muted mb-3">No Events Found</h4>
+                    <p class="text-muted mb-4">You haven't created any events yet. Start by adding your first event!</p>
+                    <a href="{{ route('dashboard.events.create') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-plus me-2"></i>Create Your First Event
+                    </a>
+                </div>
+            @endif
+        </div>
+
+        <!-- Daily Events Tab -->
+        <div class="tab-pane fade" id="daily">
+            <div class="row">
+                @foreach($events->where('repeat_type', 'daily') as $event)
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <!-- Same card structure as above -->
+                        <div class="card h-100 shadow-sm border-0 hover-shadow">
+                            <div class="card-header border-0"
+                                 style="background: linear-gradient(135deg, {{ $event->colors ?? '#ffc107' }}, {{ $event->colors ?? '#ffc107' }}cc);">
+                                <span class="badge bg-white text-dark">
+                                    <i class="fas fa-sun"></i> Daily
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title">{{ $event->title }}</h5>
+                                <p class="card-text text-muted">{{ Str::limit($event->description, 100) }}</p>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
+        <!-- Weekly Events Tab -->
+        <div class="tab-pane fade" id="weekly">
+            <div class="row">
+                @foreach($events->where('repeat_type', 'weekly') as $event)
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <!-- Same card structure -->
+                        <div class="card h-100 shadow-sm border-0 hover-shadow">
+                            <div class="card-header border-0"
+                                 style="background: linear-gradient(135deg, {{ $event->colors ?? '#17a2b8' }}, {{ $event->colors ?? '#17a2b8' }}cc);">
+                                <span class="badge bg-white text-dark">
+                                    <i class="fas fa-calendar-week"></i> Weekly
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title">{{ $event->title }}</h5>
+                                <p class="card-text text-muted">{{ Str::limit($event->description, 100) }}</p>
+                                @if($event->repeat_days_moth)
+                                    @php
+                                        $days = json_decode($event->repeat_days_moth, true) ?? [];
+                                    @endphp
+                                    <div class="mb-2">
+                                        @foreach($days as $day)
+                                            <span class="badge bg-light text-dark me-1">{{ ucfirst($day) }}</span>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
+        <!-- Monthly Events Tab -->
+        <div class="tab-pane fade" id="monthly">
+            <div class="row">
+                @foreach($events->where('repeat_type', 'monthly') as $event)
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <!-- Same card structure -->
+                        <div class="card h-100 shadow-sm border-0 hover-shadow">
+                            <div class="card-header border-0"
+                                 style="background: linear-gradient(135deg, {{ $event->colors ?? '#28a745' }}, {{ $event->colors ?? '#28a745' }}cc);">
+                                <span class="badge bg-white text-dark">
+                                    <i class="fas fa-calendar-alt"></i> Monthly
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title">{{ $event->title }}</h5>
+                                <p class="card-text text-muted">{{ Str::limit($event->description, 100) }}</p>
+                                @if($event->repeat_days_moth)
+                                    @php
+                                        $days = json_decode($event->repeat_days_moth, true) ?? [];
+                                    @endphp
+                                    <div class="mb-2">
+                                        @foreach($days as $day)
+                                            <span class="badge bg-light text-dark me-1">{{ $day }}</span>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+  
+
+<style>
+<style>
+    .hover-shadow {
+        transition: all 0.3s ease;
+    }
+
+    .hover-shadow:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .nav-pills .nav-link {
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+
+    .nav-pills .nav-link:hover {
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .card-header {
+        border-radius: 0.375rem 0.375rem 0 0 !important;
+    }
+
+    .event-card {
+        transition: opacity 0.3s ease;
+    }
+
+    .badge {
+        font-size: 0.75em;
+    }
+</style>
+</style>
+
 <script>
-    // Initialize time options
-    function initializeTimeOptions() {
-        const timeOptions = [];
-        for (let hour = 0; hour < 24; hour++) {
-            timeOptions.push(`${hour.toString().padStart(2, '0')}:00`);
-            timeOptions.push(`${hour.toString().padStart(2, '0')}:30`);
-        }
+<script>
+    // Filter functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterTabs = document.querySelectorAll('[data-bs-toggle="pill"]');
+        const eventCards = document.querySelectorAll('.event-card');
 
-        // Add options to all time selects
-        document.querySelectorAll('select[name="event_times[]"]').forEach(select => {
-            select.innerHTML = '';
-            timeOptions.forEach(time => {
-                const option = document.createElement('option');
-                option.value = time;
-                option.textContent = time;
-                if (time === '09:00') option.selected = true;
-                select.appendChild(option);
+        filterTabs.forEach(tab => {
+            tab.addEventListener('shown.bs.tab', function(e) {
+                const targetType = e.target.getAttribute('href').substring(1);
+
+                if (targetType === 'all') {
+                    eventCards.forEach(card => {
+                        card.style.display = 'block';
+                        card.classList.remove('d-none');
+                    });
+                } else {
+                    eventCards.forEach(card => {
+                        const cardType = card.getAttribute('data-type');
+                        if (cardType === targetType) {
+                            card.style.display = 'block';
+                            card.classList.remove('d-none');
+                        } else {
+                            card.style.display = 'none';
+                            card.classList.add('d-none');
+                        }
+                    });
+                }
             });
         });
-    }
+    });
 
-    // Initialize monthly days
-    function initializeMonthlyDays() {
-        const container = document.getElementById('monthlyDaysContainer');
-        container.innerHTML = '';
-
-        for (let day = 1; day <= 31; day++) {
-            const col = document.createElement('div');
-            col.className = 'col-2 mb-2';
-            col.style = "padding-left: 35px;";
-
-            const formCheck = document.createElement('div');
-            formCheck.className = 'form-check';
-
-            const input = document.createElement('input');
-            input.className = 'form-check-input';
-            input.type = 'checkbox';
-            input.value = day;
-            input.id = `day${day}`;
-            input.name = 'monthly_days[]';
-
-            const label = document.createElement('label');
-            label.className = 'form-check-label';
-            label.setAttribute('for', `day${day}`);
-            label.textContent = day;
-
-            formCheck.appendChild(input);
-            formCheck.appendChild(label);
-            col.appendChild(formCheck);
-            container.appendChild(col);
-        }
-    }
-
-    // Toggle frequency options
-    function toggleFrequencyOptions() {
-        const frequency = document.getElementById('frequency').value;
-
-        document.getElementById('dailyOptions').style.display = frequency === 'daily' ? 'block' : 'none';
-        document.getElementById('weeklyOptions').style.display = frequency === 'weekly' ? 'block' : 'none';
-        document.getElementById('monthlyOptions').style.display = frequency === 'monthly' ? 'block' : 'none';
-
-        updatePreview();
-    }
-
-    // Add time input
-    function addTimeInput() {
-        const container = document.getElementById('eventTimesContainer');
-        const newTimeGroup = document.createElement('div');
-        newTimeGroup.className = 'time-input-group d-flex align-items-center';
-
-        newTimeGroup.innerHTML = `
-            <select class="form-select me-2" name="event_times[]">
-                <!-- Will be populated by initializeTimeOptions -->
-            </select>
-            <button type="button" class="btn btn-danger btn-sm" onclick="removeTimeInput(this)">Remove</button>
-        `;
-
-        container.appendChild(newTimeGroup);
-        initializeTimeOptions();
-        updateRemoveButtons();
-        updatePreview();
-    }
-
-    // Remove time input
-    function removeTimeInput(button) {
-        button.parentElement.remove();
-        updateRemoveButtons();
-        updatePreview();
-    }
-
-    // Update remove buttons visibility
-    function updateRemoveButtons() {
-        const timeGroups = document.querySelectorAll('.time-input-group');
-        timeGroups.forEach((group, index) => {
-            const removeBtn = group.querySelector('.btn-danger');
-            if (removeBtn) {
-                removeBtn.style.display = timeGroups.length > 1 ? 'inline-block' : 'none';
+    // Success message auto-hide
+    @if(session('success'))
+        setTimeout(function() {
+            const alert = document.querySelector('.alert-success');
+            if (alert) {
+                alert.style.transition = 'opacity 0.5s ease';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
             }
-        });
-    }
-
-    // Update color preview
-    function updateColorPreview() {
-        const color = document.getElementById('color').value;
-        document.getElementById('colorPreview').style.backgroundColor = color;
-        document.getElementById('colorValue').textContent = color;
-        document.getElementById('submitBtn').style.backgroundColor = color;
-        updatePreview();
-    }
-
-    // Update preview
-    function updatePreview() {
-        const title = document.getElementById('title').value || 'Untitled';
-        const color = document.getElementById('color').value;
-        const description = document.getElementById('description').value || 'No description';
-        const frequency = document.getElementById('frequency').value;
-
-        document.getElementById('previewTitle').textContent = title;
-        document.getElementById('previewColor').style.backgroundColor = color;
-        document.getElementById('previewColorValue').textContent = color;
-        document.getElementById('previewDescription').textContent = description;
-        document.getElementById('previewFrequency').textContent = frequency;
-
-        // Update frequency details
-        let frequencyDetails = '';
-        if (frequency === 'daily') {
-            const interval = document.getElementById('dailyInterval').value;
-            frequencyDetails = `<strong>Interval:</strong> Every ${interval} day(s)`;
-        } else if (frequency === 'weekly') {
-            const selectedDays = Array.from(document.querySelectorAll('#weeklyOptions input:checked')).map(cb => cb.value);
-            frequencyDetails = `<strong>Days:</strong> ${selectedDays.join(', ') || 'None selected'}`;
-        } else if (frequency === 'monthly') {
-            const selectedDays = Array.from(document.querySelectorAll('#monthlyOptions input:checked')).map(cb => cb.value);
-            frequencyDetails = `<strong>Days:</strong> ${selectedDays.join(', ') || 'None selected'}`;
-        }
-        document.getElementById('previewFrequencyDetails').innerHTML = frequencyDetails;
-
-        // Update times
-        const times = Array.from(document.querySelectorAll('select[name="event_times[]"]')).map(select => select.value);
-        document.getElementById('previewTimes').textContent = times.join(', ');
-    }
-
-    // Event listeners
-    document.getElementById('color').addEventListener('change', updateColorPreview);
-    document.getElementById('title').addEventListener('input', updatePreview);
-    document.getElementById('description').addEventListener('input', updatePreview);
-    document.getElementById('dailyInterval').addEventListener('input', updatePreview);
-
-    // Add event listeners for checkboxes and selects
-    document.addEventListener('change', function(e) {
-        if (e.target.matches('#weeklyOptions input[type="checkbox"]') ||
-            e.target.matches('#monthlyOptions input[type="checkbox"]') ||
-            e.target.matches('select[name="event_times[]"]')) {
-            updatePreview();
-        }
-    });
-
-    // Initialize on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        initializeTimeOptions();
-        initializeMonthlyDays();
-        updateColorPreview();
-        updateRemoveButtons();
-        updatePreview();
-    });
+        }, 3000);
+    @endif
 </script>
 
-@stack('script')
+@include('layouts.footer')

@@ -24,7 +24,7 @@ return new class extends Migration
             $table->json('end_date'); // agar kerak bo'lsa ishlatiladi
             $table->string('status')->default('active'); // active, inactive, etc.
             $table->timestamps();
-            
+
         });
     }
 

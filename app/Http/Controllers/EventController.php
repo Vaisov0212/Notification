@@ -1,8 +1,11 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use App\Models\Time;
+use Illuminate\Support\Facades\Validator;
+
 use App\Models\Event;
 class EventController extends Controller
 {
@@ -11,7 +14,11 @@ class EventController extends Controller
      */
     public function index()
     {
-        return view('event.index');
+         $events = Event::where('user_id', Auth::id())
+                   ->orderBy('created_at', 'desc')
+                   ->get();
+
+    return view('event.index', compact('events'));
     }
 
     /**
@@ -19,7 +26,7 @@ class EventController extends Controller
      */
     public function create()
     {
-
+        return view('event.create');
     }
 
     /**
@@ -27,19 +34,52 @@ class EventController extends Controller
      */
     public function store(Request $request)
     {
-        dd($request);
-        $events=new Event;
+        // dd($request->all());
+         $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            // 'colors' => 'required|string|max:7', // hex color format
+            'repeat_type' => 'required|in:daily,weekly,monthly',
+            'repeat_interval' => 'nullable|integer|min:1',
+            'weekly_days' => 'nullable|array',
+            'monthly_days' => 'nullable|array',
+            'event_times' => 'required|array|min:1',
+            'event_times.*' => 'required|string' // sodda format validation
+        ]);
 
-        $events->title=$request->title;
-        $events->description=$request->description;
-        $events->start_date=$request->start_date;
-        $events->end_date=$request->end_date;
-        $events->start_time=$request->start_time;
-        $events->end_time=$request->end_time;
-        $events->event_days=implode(',', $request->event_days);
-        $events->event_times=implode(',', $request->event_times);
+$repeatDays = null;
+switch ($request->repeat_type) {
+    case 'weekly':
+        $repeatDays = $request->weekly_days; // Bu yerda weekly_days ishlatish kerak edi
+        break;
+    case 'monthly':
+        $repeatDays = $request->monthly_days;
+        break;
+    case 'daily':
+        $repeatDays = null;
+        break;
+}
 
-    }
+            // Event yaratish
+            Event::create([
+                'user_id' => Auth::id(),
+                'title' => $request->title,
+                'description' => $request->description,
+                'colors' => $request->color,
+                'repeat_type' => $request->repeat_type,
+                'repeat_interval' => 1,
+                'repeat_days_moth' => json_encode($repeatDays),
+                'start_date' => json_encode($request->event_times),
+                'end_date' => 1, // default bo'sh array
+                'status' => 'active'
+            ]);
+
+            return redirect()->route('dashboard.events.index')
+                           ->with('success', 'Event muvaffaqiyatli yaratildi!');
+
+
+        }
+
 
     /**
      * Display the specified resource.
