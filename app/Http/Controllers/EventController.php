@@ -111,5 +111,24 @@ switch ($request->repeat_type) {
     public function destroy(string $id)
     {
         //
+
+       try {
+            $event = Event::where('id', $id)
+                         ->where('user_id', Auth::id())
+                         ->firstOrFail();
+
+            $eventTitle = $event->title;
+            $event->delete();
+
+            return redirect()->back()->with('success', "Event '{$eventTitle}' muvaffaqiyatli o'chirildi!");
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return redirect()->back()->with('error', 'Event topilmadi yoki sizga tegishli emas!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Event o\'chirishda xatolik yuz berdi!');
+        }
     }
-}
+
+
+    }
+

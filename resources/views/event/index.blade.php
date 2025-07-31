@@ -12,7 +12,7 @@
                             <p class="text-muted mb-0">Manage your scheduled events and reminders</p>
                         </div>
                         <a href="{{ route('dashboard.events.create') }}" class="btn btn-primary">
-                            <i class="fas fa-plus me-2"></i>Add New Event
+                            <i class="mdi mdi-calendar-plus"></i>Add New Event
                         </a>
                     </div>
                 </div>
@@ -24,7 +24,7 @@
             <ul class="nav nav-pills nav-fill bg-light rounded p-1">
                 <li class="nav-item">
                     <a class="nav-link active" href="#all" data-bs-toggle="pill">
-                        <i class="fas fa-calendar me-2"></i>All Events
+                        <i class="mdi mdi-view-headline"></i>All Events
                         <span class="badge bg-secondary ms-2">{{ $events->count() }}</span>
                     </a>
                 </li>
@@ -264,7 +264,7 @@
                     </div>
                 @endforeach
             </div>
-  
+
 
 <style>
 <style>
